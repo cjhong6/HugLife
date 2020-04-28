@@ -88,6 +88,9 @@ public class SampleCreature extends Creature {
      * Nothing special happens when a SampleCreature moves.
      */
     public void move() {
+      // r=155;
+      // g=61;
+      // b=76;
     }
 
     /**

@@ -4,11 +4,13 @@ import huglife.Creature;
 import huglife.Direction;
 import huglife.Action;
 import huglife.Occupant;
+import huglife.HugLifeUtils;
 
 import java.awt.Color;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * An implementation of a motile pacifist photosynthesizer.
@@ -29,6 +31,16 @@ public class Plip extends Creature {
      * blue color.
      */
     private int b;
+
+    private double energyLose = 0.15;
+    private double energyGain = 0.2;
+    private double energyRetain = 0.5;
+    private double energyGiven = 0.5;
+    private double moveProbability = 0.5;
+    private static final double MAX_ENERGY=2;
+    private static final double MIN_ENERGY=0;
+
+
 
     /**
      * creates plip with energy equal to E.
@@ -57,8 +69,12 @@ public class Plip extends Creature {
      * that you get this exactly correct.
      */
     public Color color() {
-        g = 63;
-        return color(r, g, b);
+        if(energy==MIN_ENERGY){
+          g=63;
+        }else if(energy==MAX_ENERGY){
+          g = 255;
+        }
+        return color(99, (int)(96*energy+63), 76);
     }
 
     /**
@@ -74,7 +90,8 @@ public class Plip extends Creature {
      * private static final variable. This is not required for this lab.
      */
     public void move() {
-        // TODO
+        energy = energy-energyLose;
+        if(energy<MIN_ENERGY) energy=MIN_ENERGY;
     }
 
 
@@ -82,7 +99,8 @@ public class Plip extends Creature {
      * Plips gain 0.2 energy when staying due to photosynthesis.
      */
     public void stay() {
-        // TODO
+        energy = energy+energyGain;
+        if(energy>MAX_ENERGY) energy=MAX_ENERGY;
     }
 
     /**
@@ -91,7 +109,10 @@ public class Plip extends Creature {
      * Plip.
      */
     public Plip replicate() {
-        return this;
+        double childEnergy = energy*energyGiven;
+        energy=energy*energyRetain;
+
+        return new Plip(childEnergy);
     }
 
     /**
@@ -110,20 +131,33 @@ public class Plip extends Creature {
     public Action chooseAction(Map<Direction, Occupant> neighbors) {
         // Rule 1
         Deque<Direction> emptyNeighbors = new ArrayDeque<>();
+        Deque<Direction> clorusDirections = new ArrayDeque<>();
         boolean anyClorus = false;
-        // TODO
-        // (Google: Enhanced for-loop over keys of NEIGHBORS?)
-        // for () {...}
 
-        if (false) { // FIXME
-            // TODO
+        for (Entry<Direction, Occupant> entry : neighbors.entrySet()) {
+            if (entry.getValue().name().equals("empty")) {
+                emptyNeighbors.addFirst(entry.getKey());
+            }
         }
 
-        // Rule 2
-        // HINT: randomEntry(emptyNeighbors)
-
-        // Rule 3
-
+        //no empty spaces, Plip should STAY
+        if (emptyNeighbors.size()==0) {
+            return new Action(Action.ActionType.STAY);
+        }else if(energy>=1.0){
+          return new Action(Action.ActionType.REPLICATE, emptyNeighbors.getFirst());
+        }else if (neighbors.get(Direction.TOP).name().equals("clorus") && Math.random() < moveProbability) {
+            anyClorus=true;
+            return new Action(Action.ActionType.MOVE, HugLifeUtils.randomEntry(emptyNeighbors));
+        } else if (neighbors.get(Direction.BOTTOM).name().equals("clorus") && Math.random() < moveProbability) {
+            anyClorus=true;
+            return new Action(Action.ActionType.MOVE, HugLifeUtils.randomEntry(emptyNeighbors));
+        } else if (neighbors.get(Direction.LEFT).name().equals("clorus") && Math.random() < moveProbability) {
+            anyClorus=true;
+            return new Action(Action.ActionType.MOVE, HugLifeUtils.randomEntry(emptyNeighbors));
+        } else if (neighbors.get(Direction.RIGHT).name().equals("clorus") && Math.random() < moveProbability) {
+            anyClorus=true;
+            return new Action(Action.ActionType.MOVE, HugLifeUtils.randomEntry(emptyNeighbors));
+        }
         // Rule 4
         return new Action(Action.ActionType.STAY);
     }
