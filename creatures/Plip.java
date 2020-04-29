@@ -131,7 +131,6 @@ public class Plip extends Creature {
     public Action chooseAction(Map<Direction, Occupant> neighbors) {
         // Rule 1
         Deque<Direction> emptyNeighbors = new ArrayDeque<>();
-        Deque<Direction> clorusDirections = new ArrayDeque<>();
         boolean anyClorus = false;
 
         for (Entry<Direction, Occupant> entry : neighbors.entrySet()) {
